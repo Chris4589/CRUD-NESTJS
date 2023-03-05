@@ -28,7 +28,7 @@ export class AuthController {
     type: Auth,
   })
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createAuthDto: CreateAuthDto) {
+  create(@Body() createAuthDto: CreateAuthDto): Promise<Auth> {
     return this.authService.create(createAuthDto);
   }
 
@@ -38,7 +38,7 @@ export class AuthController {
     description: 'The records has been successfully found.',
     type: [Auth],
   })
-  findAll() {
+  findAll(): Promise<Auth[]> {
     return this.authService.findAll();
   }
 
@@ -48,7 +48,7 @@ export class AuthController {
     description: 'The record has been successfully found.',
     type: Auth,
   })
-  findOne(@Param('id', ParseIntPipe) id: number) {
+  findOne(@Param('id', ParseIntPipe) id: number): Promise<Auth> {
     return this.authService.findOne(id);
   }
 
@@ -62,7 +62,7 @@ export class AuthController {
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateAuthDto: UpdateAuthDto,
-  ) {
+  ): Promise<Auth> {
     return this.authService.update(id, updateAuthDto);
   }
 
@@ -73,7 +73,7 @@ export class AuthController {
     type: Auth,
   })
   @HttpCode(HttpStatus.CREATED)
-  remove(@Param('id', ParseIntPipe) id: number) {
+  remove(@Param('id', ParseIntPipe) id: number): Promise<Auth> {
     return this.authService.remove(id);
   }
 }

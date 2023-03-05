@@ -13,7 +13,7 @@ export class AuthService {
     @InjectRepository(Auth)
     private readonly authRepository: Repository<Auth>,
   ) {}
-  async create(createAuthDto: CreateAuthDto) {
+  async create(createAuthDto: CreateAuthDto): Promise<Auth> {
     const userExists = await this.authRepository.findOne({
       where: { email: createAuthDto.email },
     });
@@ -28,7 +28,7 @@ export class AuthService {
     return newUser;
   }
 
-  async findAll() {
+  async findAll(): Promise<Auth[]> {
     const users = await this.authRepository.find();
     if (users.length === 0) {
       this.logger.error('No users found');
@@ -38,7 +38,7 @@ export class AuthService {
     return users;
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<Auth> {
     const user = await this.authRepository.findOneBy({ id });
     if (!user) {
       this.logger.error('No user found');
@@ -48,7 +48,7 @@ export class AuthService {
     return user;
   }
 
-  async update(id: number, updateAuthDto: UpdateAuthDto) {
+  async update(id: number, updateAuthDto: UpdateAuthDto): Promise<Auth> {
     const user = await this.findOne(id);
     const parseUser = await this.authRepository.preload({
       id,
@@ -62,7 +62,7 @@ export class AuthService {
     return newUser;
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<Auth> {
     const user = await this.findOne(id);
     const deleteUser = await this.authRepository.remove(user);
     this.logger.log(`User ${user.email} deleted`);
