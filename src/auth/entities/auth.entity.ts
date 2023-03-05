@@ -1,8 +1,9 @@
-import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { BeforeInsert, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { CreateAuthDto } from '../dto/create-auth.dto';
 import { UpdateAuthDto } from '../dto/update-auth.dto';
 import * as bcrypt from 'bcrypt';
+import { Book } from '../../book/entities/book.entity';
 
 @Entity('auth')
 export class Auth {
@@ -25,6 +26,10 @@ export class Auth {
   @Column('varchar', { length: 255, name: 'role' })
   @ApiProperty()
   role: string;
+
+  @OneToMany(() => Book, (book: Book) => book.renter, { cascade: true })
+  @ApiProperty()
+  books?: Book[];
 
   @BeforeInsert()
   transformRole() {
