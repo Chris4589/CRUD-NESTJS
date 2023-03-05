@@ -6,6 +6,10 @@ import { Book } from './entities/book.entity';
 import { Auth } from '../auth/entities/auth.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { CreateBookDto } from './dto/create-book.dto';
+import { PaginationDto } from '../commons/dto/pagination.dto';
+import { JwtModule } from '@nestjs/jwt';
+import { JwtStrategy } from '../commons/jwt-strategys';
+import { PassportModule } from '@nestjs/passport';
 
 describe('BookController', () => {
   let controller: BookController;
@@ -18,6 +22,7 @@ describe('BookController', () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [BookController],
       providers: [
+        JwtStrategy,
         BookService,
         {
           provide: getRepositoryToken(Auth),
@@ -27,8 +32,26 @@ describe('BookController', () => {
           provide: getRepositoryToken(Book),
           useClass: Repository,
         },
+        {
+          provide: JwtStrategy,
+          useValue: {
+            sign: jest.fn(() => 'mock-token'),
+            verify: jest.fn(() => ({ id: 1 })),
+            validate: jest.fn(() => ({ id: 1 })),
+          },
+        },
       ],
-      // imports: [AuthModule],
+      imports: [
+        PassportModule.register({ defaultStrategy: 'jwt' }),
+        JwtModule.registerAsync({
+          imports: [],
+          inject: [],
+          useFactory: () => ({
+            secret: '1',
+            signOptions: { expiresIn: '3h' },
+          }),
+        }),
+      ],
     }).compile();
 
     controller = module.get<BookController>(BookController);
@@ -48,12 +71,14 @@ describe('BookController', () => {
 
   it('findAll - ok', () => {
     jest.spyOn(bookRepository, 'find').mockResolvedValueOnce([book]);
-    expect(controller.findAll()).resolves.toEqual([book]);
+    expect(controller.findAll(new PaginationDto())).resolves.toEqual([book]);
   });
 
   it('findAll - error', () => {
     jest.spyOn(bookRepository, 'find').mockResolvedValueOnce([]);
-    expect(controller.findAll()).rejects.toThrow('No books found');
+    expect(controller.findAll(new PaginationDto())).rejects.toThrow(
+      'No books found',
+    );
   });
 
   it('create - ok', () => {

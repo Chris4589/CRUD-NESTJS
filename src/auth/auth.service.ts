@@ -1,10 +1,19 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { Auth } from './entities/auth.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NotContentException } from '../exceptions/NotContentException';
+import { LoginDto } from './dto/login.dto';
+import { JwtService } from '@nestjs/jwt';
+import { LoginResponseInterface } from '../interfaces/login-response.interface';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -12,6 +21,8 @@ export class AuthService {
   constructor(
     @InjectRepository(Auth)
     private readonly authRepository: Repository<Auth>,
+
+    private readonly jwtService: JwtService,
   ) {}
   async create(createAuthDto: CreateAuthDto): Promise<Auth> {
     const userExists = await this.authRepository.findOne({
@@ -26,6 +37,27 @@ export class AuthService {
 
     this.logger.log(`User ${newUser.email} created`);
     return newUser;
+  }
+  async login(loginDto: LoginDto): Promise<LoginResponseInterface> {
+    const user = await this.authRepository.findOneBy({ email: loginDto.email });
+    if (!user) {
+      this.logger.error('User not found');
+      throw new UnauthorizedException('User not found');
+    }
+    if (!bcrypt.compareSync(loginDto.password, user.password)) {
+      this.logger.error('Invalid password');
+      throw new UnauthorizedException('Invalid password');
+    }
+    const token = this.jwtService.sign({
+      email: user.email,
+      userId: user.id,
+      username: user.username,
+    });
+    delete user.password;
+    return {
+      user,
+      token,
+    };
   }
 
   async findAll(): Promise<Auth[]> {

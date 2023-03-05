@@ -7,6 +7,9 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { NotContentException } from '../exceptions/NotContentException';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { ConflictException } from '@nestjs/common';
+import { JwtStrategy } from '../commons/jwt-strategys';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -17,10 +20,30 @@ describe('AuthController', () => {
       controllers: [AuthController],
       providers: [
         AuthService,
+        JwtStrategy,
         {
           provide: getRepositoryToken(Auth),
           useClass: Repository,
         },
+        {
+          provide: JwtStrategy,
+          useValue: {
+            sign: jest.fn(() => 'mock-token'),
+            verify: jest.fn(() => ({ id: 1 })),
+            validate: jest.fn(() => ({ id: 1 })),
+          },
+        },
+      ],
+      imports: [
+        PassportModule.register({ defaultStrategy: 'jwt' }),
+        JwtModule.registerAsync({
+          imports: [],
+          inject: [],
+          useFactory: () => ({
+            secret: '1',
+            signOptions: { expiresIn: '3h' },
+          }),
+        }),
       ],
     }).compile();
 

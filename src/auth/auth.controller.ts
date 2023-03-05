@@ -13,8 +13,10 @@ import {
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Auth } from './entities/auth.entity';
+import { LoginDto } from './dto/login.dto';
+import { LoginResponseInterface } from '../interfaces/login-response.interface';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -32,17 +34,29 @@ export class AuthController {
     return this.authService.create(createAuthDto);
   }
 
+  @Post('login')
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'The record has been successfully created.',
+  })
+  @HttpCode(HttpStatus.CREATED)
+  login(@Body() createAuthDto: LoginDto): Promise<LoginResponseInterface> {
+    return this.authService.login(createAuthDto);
+  }
+
   @Get()
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'The records has been successfully found.',
     type: [Auth],
   })
+  @ApiBearerAuth('access-token')
   findAll(): Promise<Auth[]> {
     return this.authService.findAll();
   }
 
   @Get(':id')
+  @ApiBearerAuth('access-token')
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'The record has been successfully found.',
@@ -53,6 +67,7 @@ export class AuthController {
   }
 
   @Patch(':id')
+  @ApiBearerAuth('access-token')
   @ApiResponse({
     status: HttpStatus.CREATED,
     description: 'The record has been successfully updated.',
@@ -67,6 +82,7 @@ export class AuthController {
   }
 
   @Delete(':id')
+  @ApiBearerAuth('access-token')
   @ApiResponse({
     status: HttpStatus.CREATED,
     description: 'The record has been successfully removed.',

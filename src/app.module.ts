@@ -10,7 +10,9 @@ import * as process from 'process';
   controllers: [],
   providers: [],
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     TypeOrmModule.forRoot({
       ssl: Boolean(process.env.DB_SSL), // no usar ssl
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -32,5 +34,6 @@ import * as process from 'process';
     AuthModule,
     BookModule,
   ],
+  exports: [ConfigModule],
 })
 export class AppModule {}
