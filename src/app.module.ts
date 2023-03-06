@@ -34,6 +34,6 @@ import * as process from 'process';
     AuthModule,
     BookModule,
   ],
-  exports: [ConfigModule],
+  // exports: [ConfigModule],
 })
 export class AppModule {}

@@ -10,6 +10,7 @@ import { PaginationDto } from '../commons/dto/pagination.dto';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from '../commons/jwt-strategys';
 import { PassportModule } from '@nestjs/passport';
+import { BunyanLogger } from '../commons/bunyan-logger';
 
 describe('BookController', () => {
   let controller: BookController;
@@ -24,6 +25,7 @@ describe('BookController', () => {
       providers: [
         JwtStrategy,
         BookService,
+        BunyanLogger,
         {
           provide: getRepositoryToken(Auth),
           useClass: Repository,
@@ -38,6 +40,13 @@ describe('BookController', () => {
             sign: jest.fn(() => 'mock-token'),
             verify: jest.fn(() => ({ id: 1 })),
             validate: jest.fn(() => ({ id: 1 })),
+          },
+        },
+        {
+          provide: BunyanLogger,
+          useValue: {
+            logError: jest.fn(),
+            logInfo: jest.fn(),
           },
         },
       ],
