@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { CreateAuditDto } from './dto/create-audit.dto';
-import { UpdateAuditDto } from './dto/update-audit.dto';
 import { Repository } from 'typeorm';
 import { Audit } from './entities/audit.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { NotContentException } from '../exceptions/NotContentException';
+import { PaginationDto } from '../commons/dto/pagination.dto';
 
 @Injectable()
 export class AuditService {
@@ -11,24 +12,28 @@ export class AuditService {
     @InjectRepository(Audit)
     private readonly auditRepository: Repository<Audit>,
   ) {}
-  async create(createAuditDto: CreateAuditDto) {
+  async create(createAuditDto: CreateAuditDto): Promise<Audit> {
     const audit = this.auditRepository.create(createAuditDto);
     return this.auditRepository.save(audit);
   }
 
-  findAll() {
-    return `This action returns all audit`;
+  async findAll(pagination: PaginationDto): Promise<Audit[]> {
+    const { limit = 10, offset = 0 } = pagination;
+    const audits = await this.auditRepository.find({
+      take: limit,
+      skip: offset,
+    });
+    if (audits.length == 0) {
+      throw new NotContentException('No audits found');
+    }
+    return audits;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} audit`;
-  }
-
-  update(id: number, updateAuditDto: UpdateAuditDto) {
-    return `This action updates a #${id} audit`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} audit`;
+  async findOne(id: number): Promise<Audit> {
+    const audit: Audit = await this.auditRepository.findOneBy({ id });
+    if (!audit) {
+      throw new NotContentException('No audit found');
+    }
+    return audit;
   }
 }

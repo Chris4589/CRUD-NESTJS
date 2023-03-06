@@ -11,9 +11,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from '../commons/jwt-strategys';
 import { PassportModule } from '@nestjs/passport';
 import { BunyanLogger } from '../commons/bunyan-logger';
-import { Audit } from '../audit/entities/audit.entity';
 import { PostRequestInterceptor } from '../interceptors/postRequest.interceptor';
-import { APP_INTERCEPTOR } from '@nestjs/core';
 import { MockLoggingInterceptor } from '../interceptors/mock.interceptor';
 
 describe('BookController', () => {
