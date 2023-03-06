@@ -9,10 +9,12 @@ import { tap } from 'rxjs/operators';
 import { AuditInterface } from '../interfaces/audit.interface';
 import { Repository } from 'typeorm';
 import { Audit } from '../audit/entities/audit.entity';
+import { AuditService } from '../audit/audit.service';
+import { CreateAuditDto } from '../audit/dto/create-audit.dto';
 
 @Injectable()
 export class PostRequestInterceptor implements NestInterceptor {
-  constructor() {}
+  constructor(private readonly auditService: AuditService) {}
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     console.log('Before...');
 
@@ -25,24 +27,24 @@ export class PostRequestInterceptor implements NestInterceptor {
       request.socket.remoteAddress ||
       request.connection.socket.remoteAddress;
 
-    const audit: AuditInterface = {
-      request: JSON.stringify(request.body),
-      method: request.method,
-      uri: request.originalUrl,
-      status: response.statusCode,
-      createdAt: new Date(),
-      user: request.user.username,
-      ip,
-      error: '',
-    };
+    const audit: CreateAuditDto = new CreateAuditDto();
+    audit.request = JSON.stringify(request.body);
+    audit.method = request.method;
+    audit.uri = request.originalUrl;
+    audit.status = response.statusCode;
+    audit.createdAt = new Date().toDateString();
+    audit.user = request.user.username;
+    audit.ip = ip;
+    audit.error = '';
 
     return next.handle().pipe(
       tap(() => {
-        console.log(audit);
+        this.auditService.create(audit).finally();
       }),
       catchError((err) => {
         audit.error = err.message;
         audit.status = err.status || 500;
+        this.auditService.create(audit).finally();
         throw err;
       }),
     );

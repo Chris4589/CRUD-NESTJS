@@ -7,8 +7,8 @@ export class Audit {
   @Column({ name: 'api', type: 'varchar', length: 255, nullable: true })
   api?: string;
 
-  @Column({ name: 'created_at', type: 'timestamp', nullable: false })
-  createdAt?: Date;
+  @Column({ name: 'created_at', type: 'varchar', nullable: false })
+  createdAt?: string;
 
   @Column({ name: 'error', type: 'varchar', length: 255, nullable: false })
   error?: string;
