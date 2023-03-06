@@ -10,6 +10,7 @@ import {
   ParseIntPipe,
   UseGuards,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
 import { BookService } from './book.service';
 import { CreateBookDto } from './dto/create-book.dto';
@@ -18,10 +19,12 @@ import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Book } from './entities/book.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { PaginationDto } from '../commons/dto/pagination.dto';
+import { PostRequestInterceptor } from '../interceptors/postRequest.interceptor';
 
 @Controller('book')
 @ApiTags('book')
 @ApiBearerAuth('access-token')
+@UseInterceptors(PostRequestInterceptor)
 export class BookController {
   constructor(private readonly bookService: BookService) {}
 

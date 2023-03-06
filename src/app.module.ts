@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { entities } from './entities';
 import { ConfigModule } from '@nestjs/config';
 import { BookModule } from './book/book.module';
+import { AuditModule } from './audit/audit.module';
 import * as process from 'process';
 
 @Module({
@@ -33,6 +34,7 @@ import * as process from 'process';
     }),
     AuthModule,
     BookModule,
+    AuditModule,
   ],
   // exports: [ConfigModule],
 })
