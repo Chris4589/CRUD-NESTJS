@@ -6,9 +6,6 @@ import {
 } from '@nestjs/common';
 import { catchError, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { AuditInterface } from '../interfaces/audit.interface';
-import { Repository } from 'typeorm';
-import { Audit } from '../audit/entities/audit.entity';
 import { AuditService } from '../audit/audit.service';
 import { CreateAuditDto } from '../audit/dto/create-audit.dto';
 
