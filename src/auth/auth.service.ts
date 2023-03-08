@@ -1,7 +1,6 @@
 import {
   ConflictException,
   Injectable,
-  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
@@ -17,7 +16,6 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
-  private logger: Logger = new Logger(AuthService.name);
   constructor(
     @InjectRepository(Auth)
     private readonly authRepository: Repository<Auth>,
@@ -29,23 +27,17 @@ export class AuthService {
       where: { email: createAuthDto.email },
     });
     if (userExists) {
-      this.logger.error('User already exists');
       throw new ConflictException('User already exists');
     }
     const user = Auth.fromCreateAuthDto(createAuthDto);
-    const newUser = await this.authRepository.save(user);
-
-    this.logger.log(`User ${newUser.email} created`);
-    return newUser;
+    return await this.authRepository.save(user);
   }
   async login(loginDto: LoginDto): Promise<LoginResponseInterface> {
     const user = await this.authRepository.findOneBy({ email: loginDto.email });
     if (!user) {
-      this.logger.error('User not found');
       throw new UnauthorizedException('User not found');
     }
     if (!bcrypt.compareSync(loginDto.password, user.password)) {
-      this.logger.error('Invalid password');
       throw new UnauthorizedException('Invalid password');
     }
     const token = this.jwtService.sign({
@@ -63,20 +55,16 @@ export class AuthService {
   async findAll(): Promise<Auth[]> {
     const users = await this.authRepository.find();
     if (users.length === 0) {
-      this.logger.error('No users found');
       throw new NotContentException('No users found');
     }
-    this.logger.log(`Users found: ${users.length}`);
     return users;
   }
 
   async findOne(id: number): Promise<Auth> {
     const user = await this.authRepository.findOneBy({ id });
     if (!user) {
-      this.logger.error('No user found');
       throw new NotContentException('No user found');
     }
-    this.logger.log(`User found: ${user.email}`);
     return user;
   }
 
@@ -89,15 +77,11 @@ export class AuthService {
         email: user.email,
       }),
     });
-    const newUser = await this.authRepository.save(parseUser);
-    this.logger.log(`User ${newUser.email} updated`);
-    return newUser;
+    return await this.authRepository.save(parseUser);
   }
 
   async remove(id: number): Promise<Auth> {
     const user = await this.findOne(id);
-    const deleteUser = await this.authRepository.remove(user);
-    this.logger.log(`User ${user.email} deleted`);
-    return deleteUser;
+    return await this.authRepository.remove(user);
   }
 }

@@ -4,6 +4,7 @@ import * as os from 'os';
 import * as ip from 'ip';
 import * as path from 'path';
 import { Injectable, Logger as Log4 } from '@nestjs/common';
+import { Log } from '../interfaces/log.interface';
 
 @Injectable()
 export class BunyanLogger {
@@ -26,17 +27,17 @@ export class BunyanLogger {
     return createLogger(options);
   }
 
-  logError(responseCode: number, className: string, message: string): void {
+  logError(data: Log, className: string, message: string): void {
     const printer: Log4 = new Log4(className);
     printer.error(message);
     const logger = this.write();
-    logger.error({ responseCode }, message);
+    logger.error(data, message);
   }
 
-  logInfo(responseCode: number, className: string, message: string): void {
+  logInfo(data: Log, className: string, message: string): void {
     const printer: Log4 = new Log4(className);
     printer.log(message);
     const logger = this.write();
-    logger.info({ responseCode }, message);
+    logger.info(data, message);
   }
 }

@@ -4,4 +4,6 @@ export class Log {
   responseCode?: number;
   responseTime?: number;
   clientIp?: string;
+  msg?: string;
+  time?: string;
 }

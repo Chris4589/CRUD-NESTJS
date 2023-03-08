@@ -5,8 +5,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Book } from './entities/book.entity';
 import { Auth } from '../auth/entities/auth.entity';
 import { AuthModule } from '../auth/auth.module';
-import { BunyanLogger } from '../commons/bunyan-logger';
 import { AuditModule } from '../audit/audit.module';
+import { BunyanLogger } from '../commons/bunyan-logger';
 
 @Module({
   controllers: [BookController],

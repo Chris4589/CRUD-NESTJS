@@ -1,15 +1,15 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
   HttpStatus,
+  Param,
   ParseIntPipe,
-  UseGuards,
+  Patch,
+  Post,
   Query,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { BookService } from './book.service';
@@ -20,10 +20,15 @@ import { Book } from './entities/book.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { PaginationDto } from '../commons/dto/pagination.dto';
 import { PostRequestInterceptor } from '../interceptors/postRequest.interceptor';
+import { IncludeRoles } from '../decorators/role.decorator';
+import { ROLES } from '../interfaces/roles.enum';
+import { RoleGuard } from '../guards/role/role.guard';
 
 @Controller('book')
 @ApiTags('book')
-@ApiBearerAuth('access-token')
+@ApiBearerAuth('access-token') // primero el token
+@IncludeRoles(ROLES.ADMIN, ROLES.USER) // luego el rol
+@UseGuards(AuthGuard(), RoleGuard) // luego la informacion ya que salio gracias al token
 @UseInterceptors(PostRequestInterceptor)
 export class BookController {
   constructor(private readonly bookService: BookService) {}
@@ -34,13 +39,11 @@ export class BookController {
     description: 'The record has been successfully created.',
     type: Book,
   })
-  @UseGuards(AuthGuard())
   create(@Body() createBookDto: CreateBookDto): Promise<Book> {
     return this.bookService.create(createBookDto);
   }
 
   @Get()
-  @UseGuards(AuthGuard())
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'The records has been successfully retrieved.',
@@ -56,7 +59,6 @@ export class BookController {
     description: 'The record has been successfully retrieved.',
     type: Book,
   })
-  @UseGuards(AuthGuard())
   findOne(@Param('id', ParseIntPipe) id: number): Promise<Book> {
     return this.bookService.findOne(id);
   }
@@ -67,7 +69,6 @@ export class BookController {
     description: 'The record has been successfully updated.',
     type: Book,
   })
-  @UseGuards(AuthGuard())
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateBookDto: UpdateBookDto,
@@ -81,7 +82,6 @@ export class BookController {
     description: 'The record has been successfully deleted.',
     type: Book,
   })
-  @UseGuards(AuthGuard())
   remove(@Param('id', ParseIntPipe) id: number): Promise<Book> {
     return this.bookService.remove(id);
   }

@@ -10,6 +10,9 @@ import { ConflictException } from '@nestjs/common';
 import { JwtStrategy } from '../commons/jwt-strategys';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
+import { BunyanLogger } from '../commons/bunyan-logger';
+import { PostRequestInterceptor } from '../interceptors/postRequest.interceptor';
+import { MockLoggingInterceptor } from '../interceptors/mock.interceptor';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -21,6 +24,7 @@ describe('AuthController', () => {
       providers: [
         AuthService,
         JwtStrategy,
+        BunyanLogger,
         {
           provide: getRepositoryToken(Auth),
           useClass: Repository,
@@ -33,8 +37,16 @@ describe('AuthController', () => {
             validate: jest.fn(() => ({ id: 1 })),
           },
         },
+        {
+          provide: BunyanLogger,
+          useValue: {
+            logError: jest.fn(),
+            logInfo: jest.fn(),
+          },
+        },
       ],
       imports: [
+        // forwardRef(() => AuditModule),
         PassportModule.register({ defaultStrategy: 'jwt' }),
         JwtModule.registerAsync({
           imports: [],
@@ -45,7 +57,10 @@ describe('AuthController', () => {
           }),
         }),
       ],
-    }).compile();
+    })
+      .overrideInterceptor(PostRequestInterceptor)
+      .useClass(MockLoggingInterceptor)
+      .compile();
 
     controller = module.get<AuthController>(AuthController);
     repository = module.get<Repository<Auth>>(getRepositoryToken(Auth));

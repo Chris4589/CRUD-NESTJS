@@ -32,10 +32,9 @@ import * as process from 'process';
         encrypt: false,
       },
     }),
+    AuditModule,
     AuthModule,
     BookModule,
-    AuditModule,
   ],
-  // exports: [ConfigModule],
 })
 export class AppModule {}

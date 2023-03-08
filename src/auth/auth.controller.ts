@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   HttpStatus,
   HttpCode,
+  UseInterceptors, UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
@@ -17,6 +18,8 @@ import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Auth } from './entities/auth.entity';
 import { LoginDto } from './dto/login.dto';
 import { LoginResponseInterface } from '../interfaces/login-response.interface';
+import { PostRequestInterceptor } from '../interceptors/postRequest.interceptor';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -51,6 +54,8 @@ export class AuthController {
     type: [Auth],
   })
   @ApiBearerAuth('access-token')
+  @UseGuards(AuthGuard())
+  @UseInterceptors(PostRequestInterceptor)
   findAll(): Promise<Auth[]> {
     return this.authService.findAll();
   }
@@ -62,6 +67,8 @@ export class AuthController {
     description: 'The record has been successfully found.',
     type: Auth,
   })
+  @UseGuards(AuthGuard())
+  @UseInterceptors(PostRequestInterceptor)
   findOne(@Param('id', ParseIntPipe) id: number): Promise<Auth> {
     return this.authService.findOne(id);
   }
@@ -74,6 +81,8 @@ export class AuthController {
     type: Auth,
   })
   @HttpCode(HttpStatus.CREATED)
+  @UseGuards(AuthGuard())
+  @UseInterceptors(PostRequestInterceptor)
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateAuthDto: UpdateAuthDto,
@@ -89,6 +98,8 @@ export class AuthController {
     type: Auth,
   })
   @HttpCode(HttpStatus.CREATED)
+  @UseGuards(AuthGuard())
+  @UseInterceptors(PostRequestInterceptor)
   remove(@Param('id', ParseIntPipe) id: number): Promise<Auth> {
     return this.authService.remove(id);
   }
